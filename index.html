@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="KJV Bible"/>
+<meta name="apple-mobile-web-app-title" content="Bible"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="theme-color" content="#1a1510"/>
 <link rel="apple-touch-icon" href="apple-touch-icon.png"/>
 <link rel="icon" type="image/svg+xml" href="icon.svg"/>
-<title>KJV Bible</title>
+<title>Bible</title>
 <style>
 :root{
   --ink:#e8dcc8;
@@ -170,9 +170,10 @@ button{
 
 /* ── CHAPTER ── */
 #view-chapter{max-width:680px;margin:0 auto;padding:3rem 1.5rem 5rem}
-#chapter-header{text-align:center;margin-bottom:2.8rem;padding-bottom:1.4rem;border-bottom:2px solid var(--rule)}
+#chapter-header{text-align:center;margin-bottom:1.8rem;padding-bottom:1.4rem;border-bottom:2px solid var(--rule)}
 #chapter-header h1{font-size:2rem;color:var(--accent);font-weight:normal;letter-spacing:0.06em}
-#chapter-header p{font-style:italic;color:var(--subhead);font-size:0.9rem;margin-top:0.3rem}
+#chapter-top-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.4rem;padding-bottom:1rem;border-bottom:1px solid var(--rule)}
+#chapter-top-nav .top-label{flex:1;text-align:center;font-size:0.8rem;color:var(--subhead);font-style:italic}
 .sentence-break{height:1.15em}
 .verse-num{font-size:0.72rem;color:var(--ink);font-style:normal;vertical-align:super;margin-right:0.25em;letter-spacing:0.04em;user-select:none}
 .line{display:block}
@@ -223,7 +224,7 @@ input[type="file"]{font-family:var(--font);font-size:0.85rem;color:var(--subhead
 <div id="view-index" class="view active">
   <div id="index-header">
     <h1>Holy Bible</h1>
-    <p>King James Version &mdash; Personal Study Edition</p>
+    <p>Personal Study Edition</p>
   </div>
   <div id="index-body"></div>
 </div>
@@ -261,9 +262,13 @@ input[type="file"]{font-family:var(--font);font-size:0.85rem;color:var(--subhead
 </div>
 
 <div id="view-chapter" class="view">
+  <div id="chapter-top-nav">
+    <button type="button" id="btn-prev-top" class="btn">&#8592; Prev</button>
+    <span class="top-label" id="chapter-top-label"></span>
+    <button type="button" id="btn-next-top" class="btn">Next &#8594;</button>
+  </div>
   <div id="chapter-header">
     <h1 id="chapter-h1"></h1>
-    <p id="chapter-sub"></p>
   </div>
   <div id="chapter-body"></div>
   <div id="chapter-footer">
@@ -278,7 +283,7 @@ input[type="file"]{font-family:var(--font);font-size:0.85rem;color:var(--subhead
   <p class="data-sub">Export your Bible data to a JSON file, or import a previously saved backup.</p>
   <div class="data-section">
     <h3>&#8595; Export</h3>
-    <p>Downloads all your chapters as <code>kjv-bible-data.json</code>. Save it anywhere &mdash; iCloud, email, USB.</p>
+    <p>Downloads all your chapters as a backup file. Save it anywhere &mdash; iCloud, email, USB.</p>
     <button type="button" id="btn-export" class="btn btn-primary">Download kjv-bible-data.json</button>
     <div id="export-status" class="status-msg"></div>
   </div>
@@ -559,14 +564,17 @@ function showChapter(book,ch){
   var entry=loadChapter(book,ch);
   if(!entry){showIndex();return;}
   curBook=book; curCh=ch;
-  document.getElementById('chapter-h1').textContent=book;
-  document.getElementById('chapter-sub').textContent='Chapter '+ch+' \u2014 King James Version';
-  document.getElementById('chapter-footer-label').textContent=book+' '+ch+' \u00b7 KJV';
+  document.getElementById('chapter-h1').textContent=book+' '+ch;
+  document.getElementById('chapter-footer-label').textContent=book+' '+ch;
+  document.getElementById('chapter-top-label').textContent=book+' '+ch;
   document.getElementById('chapter-body').innerHTML=formatChapter(entry.verses);
   var all=getAllChapters(),idx=-1;
   for(var i=0;i<all.length;i++){if(all[i].book===book&&all[i].chapter===ch){idx=i;break;}}
-  document.getElementById('btn-prev').style.visibility=idx>0?'visible':'hidden';
-  document.getElementById('btn-next').style.visibility=idx<all.length-1?'visible':'hidden';
+  var hasPrev=idx>0, hasNext=idx<all.length-1;
+  document.getElementById('btn-prev').style.visibility=hasPrev?'visible':'hidden';
+  document.getElementById('btn-next').style.visibility=hasNext?'visible':'hidden';
+  document.getElementById('btn-prev-top').style.visibility=hasPrev?'visible':'hidden';
+  document.getElementById('btn-next-top').style.visibility=hasNext?'visible':'hidden';
   document.getElementById('nav-actions').innerHTML=
     '<button type="button" class="btn btn-danger" data-action="delete" data-book="'+esc(book)+'" data-ch="'+ch+'">Delete</button>'+
     '<button type="button" class="btn btn-muted" data-action="replace" data-book="'+esc(book)+'" data-ch="'+ch+'">Replace</button>'+
@@ -660,17 +668,21 @@ document.getElementById('btn-cancel-delete').addEventListener('click',function()
   if(b&&c) showChapter(b,c); else showIndex();
 });
 
-/* Chapter nav */
-document.getElementById('btn-prev').addEventListener('click',function(){
+/* Chapter nav — bottom and top share same logic */
+function navPrev(){
   var all=getAllChapters(),idx=-1;
   for(var i=0;i<all.length;i++){if(all[i].book===curBook&&all[i].chapter===curCh){idx=i;break;}}
   if(idx>0) showChapter(all[idx-1].book,all[idx-1].chapter);
-});
-document.getElementById('btn-next').addEventListener('click',function(){
+}
+function navNext(){
   var all=getAllChapters(),idx=-1;
   for(var i=0;i<all.length;i++){if(all[i].book===curBook&&all[i].chapter===curCh){idx=i;break;}}
   if(idx>=0&&idx<all.length-1) showChapter(all[idx+1].book,all[idx+1].chapter);
-});
+}
+document.getElementById('btn-prev').addEventListener('click', navPrev);
+document.getElementById('btn-next').addEventListener('click', navNext);
+document.getElementById('btn-prev-top').addEventListener('click', navPrev);
+document.getElementById('btn-next-top').addEventListener('click', navNext);
 
 /* Data */
 document.getElementById('btn-export').addEventListener('click', exportData);
