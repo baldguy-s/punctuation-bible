@@ -182,7 +182,8 @@ button{
 .i3{padding-left:calc(3 * var(--indent))}
 .i4{padding-left:calc(4 * var(--indent))}
 .punct{color:var(--ink);font-style:normal}
-.paren{color:var(--ink);font-style:italic}
+.paren{color:var(--ink)}
+em{font-style:italic}
 #chapter-footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--rule);font-size:0.8rem;color:var(--subhead);font-style:italic;display:flex;align-items:center;justify-content:space-between}
 
 /* ── DATA ── */
@@ -453,6 +454,21 @@ function nIndent(lv,p){
   return lv;
 }
 function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escI(s){
+  /* Preserve <i> and </i> tags as italic markers, escape everything else */
+  if(!s) return '';
+  var out='',i=0;
+  while(i<s.length){
+    if(s.slice(i,i+3)==='<i>'){ out+='<em>'; i+=3; }
+    else if(s.slice(i,i+4)==='</i>'){ out+='</em>'; i+=4; }
+    else if(s[i]==='&'){ out+='&amp;'; i++; }
+    else if(s[i]==='<'){ out+='&lt;'; i++; }
+    else if(s[i]==='>'){ out+='&gt;'; i++; }
+    else if(s[i]==='"'){ out+='&quot;'; i++; }
+    else{ out+=s[i]; i++; }
+  }
+  return out;
+}
 function lt(s){ return (s||'').replace(/^\s+/,''); }
 
 function formatChapter(verses) {
@@ -472,11 +488,11 @@ function formatChapter(verses) {
       if(fp){inn+='<span class="verse-num">'+v.num+'</span>';fp=false;}
       if(me){
         if(ip){
-          inn+='<span class="paren">'+esc(tr)+'<span class="punct">'+esc(ps)+'</span>'+esc(sx)+'</span>';
+          inn+='<span class="paren">'+escI(tr)+'<span class="punct">'+esc(ps)+'</span>'+esc(sx)+'</span>';
         } else {
-          inn+=esc(tr)+'<span class="punct">'+esc(ps)+'</span>'+esc(sx);
+          inn+=escI(tr)+'<span class="punct">'+esc(ps)+'</span>'+esc(sx);
         }
-      } else { inn+=esc(tr); }
+      } else { inn+=escI(tr); }
       html+='<span class="line i'+lv+'">'+inn+'</span>';
       lv=nIndent(lv,ps);
       if(ps==='.'||ps==='?'||ps==='!') pb=true;
