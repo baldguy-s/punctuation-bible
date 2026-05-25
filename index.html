@@ -118,19 +118,8 @@ button{
 #nav-actions{display:flex;gap:0.6rem;flex-wrap:wrap}
 
 /* ── VIEWS ── */
-/* Use visibility+height instead of display:none to avoid iOS layout issues */
-.view{
-  visibility:hidden;
-  height:0;
-  overflow:hidden;
-  pointer-events:none;
-}
-.view.active{
-  visibility:visible;
-  height:auto;
-  overflow:visible;
-  pointer-events:auto;
-}
+.view{display:none}
+.view.active{display:block}
 
 /* ── INDEX ── */
 #view-index{max-width:860px;margin:0 auto;padding:3rem 1.5rem 5rem}
