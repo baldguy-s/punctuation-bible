@@ -184,7 +184,6 @@ button{
 .punct{color:var(--ink);font-style:normal}
 .paren{color:var(--ink);font-style:italic}
 #chapter-footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--rule);font-size:0.8rem;color:var(--subhead);font-style:italic;display:flex;align-items:center;justify-content:space-between}
-#chapter-footer .footer-label{flex:1;text-align:center}
 
 /* ── DATA ── */
 #view-data{max-width:680px;margin:0 auto;padding:3rem 1.5rem 5rem}
@@ -271,7 +270,6 @@ input[type="file"]{font-family:var(--font);font-size:0.85rem;color:var(--subhead
   <div id="chapter-body"></div>
   <div id="chapter-footer">
     <button type="button" id="btn-prev" class="btn">&#8592; Prev</button>
-    <span class="footer-label" id="chapter-footer-label"></span>
     <button type="button" id="btn-next" class="btn">Next &#8594;</button>
   </div>
 </div>
@@ -474,8 +472,7 @@ function formatChapter(verses) {
       if(fp){inn+='<span class="verse-num">'+v.num+'</span>';fp=false;}
       if(me){
         if(ip){
-          var ct=tr.charAt(0)==='('?tr.slice(1):tr;
-          inn+='<span class="paren">'+esc(ct)+'<span class="punct">'+esc(ps)+'</span>'+esc(sx)+'</span>';
+          inn+='<span class="paren">'+esc(tr)+'<span class="punct">'+esc(ps)+'</span>'+esc(sx)+'</span>';
         } else {
           inn+=esc(tr)+'<span class="punct">'+esc(ps)+'</span>'+esc(sx);
         }
@@ -563,7 +560,6 @@ function showChapter(book,ch){
   if(!entry){showIndex();return;}
   curBook=book; curCh=ch;
   document.getElementById('chapter-h1').textContent=book+' '+ch;
-  document.getElementById('chapter-footer-label').textContent=book+' '+ch;
   document.getElementById('chapter-body').innerHTML=formatChapter(entry.verses);
   var all=getAllChapters(),idx=-1;
   for(var i=0;i<all.length;i++){if(all[i].book===book&&all[i].chapter===ch){idx=i;break;}}
