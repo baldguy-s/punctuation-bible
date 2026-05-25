@@ -170,10 +170,9 @@ button{
 
 /* ── CHAPTER ── */
 #view-chapter{max-width:680px;margin:0 auto;padding:3rem 1.5rem 5rem}
-#chapter-header{text-align:center;margin-bottom:1.8rem;padding-bottom:1.4rem;border-bottom:2px solid var(--rule)}
+#chapter-header{text-align:center;margin-bottom:1.8rem}
 #chapter-header h1{font-size:2rem;color:var(--accent);font-weight:normal;letter-spacing:0.06em}
 #chapter-top-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.4rem;padding-bottom:1rem;border-bottom:1px solid var(--rule)}
-#chapter-top-nav .top-label{flex:1;text-align:center;font-size:0.8rem;color:var(--subhead);font-style:italic}
 .sentence-break{height:1.15em}
 .verse-num{font-size:0.72rem;color:var(--ink);font-style:normal;vertical-align:super;margin-right:0.25em;letter-spacing:0.04em;user-select:none}
 .line{display:block}
@@ -264,7 +263,6 @@ input[type="file"]{font-family:var(--font);font-size:0.85rem;color:var(--subhead
 <div id="view-chapter" class="view">
   <div id="chapter-top-nav">
     <button type="button" id="btn-prev-top" class="btn">&#8592; Prev</button>
-    <span class="top-label" id="chapter-top-label"></span>
     <button type="button" id="btn-next-top" class="btn">Next &#8594;</button>
   </div>
   <div id="chapter-header">
@@ -566,7 +564,6 @@ function showChapter(book,ch){
   curBook=book; curCh=ch;
   document.getElementById('chapter-h1').textContent=book+' '+ch;
   document.getElementById('chapter-footer-label').textContent=book+' '+ch;
-  document.getElementById('chapter-top-label').textContent=book+' '+ch;
   document.getElementById('chapter-body').innerHTML=formatChapter(entry.verses);
   var all=getAllChapters(),idx=-1;
   for(var i=0;i<all.length;i++){if(all[i].book===book&&all[i].chapter===ch){idx=i;break;}}
