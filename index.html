@@ -128,9 +128,25 @@ button{
 #index-header p{font-style:italic;color:var(--subhead);font-size:0.9rem;margin-top:0.4rem}
 #index-empty{text-align:center;color:var(--subhead);font-style:italic;margin-top:4rem;line-height:2.4}
 #index-empty strong{display:block;font-size:1.2rem;color:var(--accent);font-style:normal;margin-bottom:0.5rem}
-.book-section{margin-bottom:2.5rem}
-.book-title{font-size:1.25rem;color:var(--accent);letter-spacing:0.05em;padding-bottom:0.4rem;border-bottom:1px solid var(--rule);margin-bottom:0.9rem;font-weight:normal}
-.chapter-grid{display:flex;flex-wrap:wrap;gap:0.5rem}
+.book-section{margin-bottom:0}
+.book-title{
+  font-size:1.1rem;color:var(--accent);letter-spacing:0.05em;
+  padding:0.6rem 1.5rem;
+  border-bottom:1px solid var(--rule);
+  border-top:1px solid var(--rule);
+  margin-bottom:0;font-weight:normal;
+  cursor:pointer;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:rgba(212,149,106,0.15);
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:52px;z-index:50;
+  background:var(--parchment);
+  user-select:none;
+}
+.book-title-arrow{font-size:0.7rem;opacity:0.6;transition:transform 0.2s ease;display:inline-block}
+.book-section.collapsed .book-title-arrow{transform:rotate(-90deg)}
+.chapter-grid{display:flex;flex-wrap:wrap;gap:0.5rem;padding:0.9rem 1.5rem 1.4rem}
+.book-section.collapsed .chapter-grid{display:none}
 .chapter-chip{
   padding:0.3rem 0.85rem;
   background:var(--surface);border:1px solid var(--rule);
@@ -174,7 +190,7 @@ button{
 #chapter-header h1{font-size:2rem;color:var(--accent);font-weight:normal;letter-spacing:0.06em}
 #chapter-top-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.4rem;padding-bottom:1rem;border-bottom:1px solid var(--rule)}
 .sentence-break{height:1.15em}
-.verse-num{font-size:0.72rem;color:var(--ink);font-style:normal;vertical-align:super;margin-right:0.25em;letter-spacing:0.04em;user-select:none}
+.verse-num{font-size:0.65rem;color:var(--accent);font-style:normal;vertical-align:super;margin-right:0.28em;letter-spacing:0.04em;user-select:none;line-height:0}
 .line{display:block}
 .i0{padding-left:0}
 .i1{padding-left:calc(1 * var(--indent))}
@@ -547,11 +563,19 @@ function renderIndex(){
   var books={};
   for(var i=0;i<chs.length;i++){ var b=chs[i].book; if(!books[b]) books[b]=[]; books[b].push(chs[i]); }
   var sb=Object.keys(books).sort(function(a,b){return bIdx(a)-bIdx(b);});
+  /* Restore collapse state from storage */
+  var colKey='kjv:collapsed';
+  var collapsed={};
+  try{ var s=sGet(colKey); if(s) collapsed=JSON.parse(s); }catch(e){}
+
   var html='';
   for(var bi=0;bi<sb.length;bi++){
     var bk=sb[bi];
     var bc=books[bk].sort(function(a,b){return a.chapter-b.chapter;});
-    html+='<div class="book-section"><div class="book-title">'+esc(bk)+'</div><div class="chapter-grid">';
+    var isCol=!!collapsed[bk];
+    html+='<div class="book-section'+(isCol?' collapsed':'')+'" data-book="'+esc(bk)+'">';
+    html+='<div class="book-title" data-toggle="'+esc(bk)+'">'+esc(bk)+'<span class="book-title-arrow">&#9660;</span></div>';
+    html+='<div class="chapter-grid">';
     for(var ci=0;ci<bc.length;ci++){
       html+='<div class="chapter-chip" data-book="'+esc(bc[ci].book)+'" data-ch="'+bc[ci].chapter+'">Chapter '+bc[ci].chapter+'</div>';
     }
@@ -701,6 +725,25 @@ document.getElementById('btn-data-back').addEventListener('click', showIndex);
 /* Delegated: chapter chips + Delete/Replace */
 document.body.addEventListener('click',function(e){
   var t=e.target||e.srcElement;
+
+  /* Book title collapse toggle */
+  var tog=pwAttr(t,'data-toggle');
+  if(tog){
+    var bname=tog.getAttribute('data-toggle');
+    var sec=pwAttr(t,'data-book');
+    if(!sec) sec=tog.parentNode;
+    if(sec&&sec.classList){
+      sec.classList.toggle('collapsed');
+      /* Persist state */
+      var colKey='kjv:collapsed';
+      var collapsed={};
+      try{ var s=sGet(colKey); if(s) collapsed=JSON.parse(s); }catch(e){}
+      if(sec.classList.contains('collapsed')) collapsed[bname]=1;
+      else delete collapsed[bname];
+      try{ sSet(colKey,JSON.stringify(collapsed)); }catch(e){}
+    }
+    return;
+  }
 
   /* Chapter chips */
   var chip=pwAttr(t,'data-ch');
