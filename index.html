@@ -122,7 +122,7 @@ button{
 .view.active{display:block}
 
 /* ── INDEX ── */
-#view-index{max-width:860px;margin:0 auto;padding:3rem 1.5rem 5rem}
+#view-index{max-width:860px;margin:0 auto;padding:3rem 1.5rem 1.5rem}
 #index-header{text-align:center;margin-bottom:3rem;padding-bottom:1.4rem;border-bottom:2px solid var(--rule)}
 #index-header h1{font-size:2.2rem;color:var(--accent);font-weight:normal;letter-spacing:0.06em}
 #index-header p{font-style:italic;color:var(--subhead);font-size:0.9rem;margin-top:0.4rem}
@@ -143,8 +143,7 @@ button{
   background:var(--parchment);
   user-select:none;
 }
-.book-title-arrow{font-size:0.7rem;opacity:0.6;transition:transform 0.2s ease;display:inline-block}
-.book-section.collapsed .book-title-arrow{transform:rotate(-90deg)}
+.book-title-arrow{font-size:0.7rem;opacity:0.6;display:inline-block}
 .chapter-grid{display:flex;flex-wrap:wrap;gap:0.5rem;padding:0.9rem 1.5rem 1.4rem}
 .book-section.collapsed .chapter-grid{display:none}
 .chapter-chip{
@@ -574,7 +573,7 @@ function renderIndex(){
     var bc=books[bk].sort(function(a,b){return a.chapter-b.chapter;});
     var isCol=!!collapsed[bk];
     html+='<div class="book-section'+(isCol?' collapsed':'')+'" data-book="'+esc(bk)+'">';
-    html+='<div class="book-title" data-toggle="'+esc(bk)+'">'+esc(bk)+'<span class="book-title-arrow">&#9660;</span></div>';
+    html+='<div class="book-title" data-toggle="'+esc(bk)+'">'+esc(bk)+'<span class="book-title-arrow">'+(isCol?'&#9654;':'&#9660;')+'</span></div>';
     html+='<div class="chapter-grid">';
     for(var ci=0;ci<bc.length;ci++){
       html+='<div class="chapter-chip" data-book="'+esc(bc[ci].book)+'" data-ch="'+bc[ci].chapter+'">Chapter '+bc[ci].chapter+'</div>';
@@ -734,6 +733,8 @@ document.body.addEventListener('click',function(e){
     if(!sec) sec=tog.parentNode;
     if(sec&&sec.classList){
       sec.classList.toggle('collapsed');
+      var arr=tog.querySelector('.book-title-arrow');
+      if(arr) arr.innerHTML=sec.classList.contains('collapsed')?'&#9654;':'&#9660;';
       /* Persist state */
       var colKey='kjv:collapsed';
       var collapsed={};
