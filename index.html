@@ -143,9 +143,20 @@ button{
   background:var(--parchment);
   user-select:none;
 }
-.book-title-arrow{font-size:0.7rem;opacity:0.6;display:inline-block}
+.book-title-arrow{
+  display:inline-block;width:0;height:0;
+  border-top:5px solid transparent;
+  border-bottom:5px solid transparent;
+  border-left:8px solid var(--accent);
+  opacity:0.8;
+  transition:transform 0.2s ease;
+  flex-shrink:0;
+}
+.book-section.expanded .book-title-arrow{
+  transform:rotate(90deg);
+}
 .chapter-grid{display:flex;flex-wrap:wrap;gap:0.5rem;padding:0.9rem 1.5rem 1.4rem}
-.book-section.collapsed .chapter-grid{display:none}
+.book-section:not(.expanded) .chapter-grid{display:none}
 .chapter-chip{
   padding:0.3rem 0.85rem;
   background:var(--surface);border:1px solid var(--rule);
@@ -571,9 +582,9 @@ function renderIndex(){
   for(var bi=0;bi<sb.length;bi++){
     var bk=sb[bi];
     var bc=books[bk].sort(function(a,b){return a.chapter-b.chapter;});
-    var isCol=!!collapsed[bk];
-    html+='<div class="book-section'+(isCol?' collapsed':'')+'" data-book="'+esc(bk)+'">';
-    html+='<div class="book-title" data-toggle="'+esc(bk)+'">'+esc(bk)+'<span class="book-title-arrow">'+(isCol?'&#9654;':'&#9660;')+'</span></div>';
+    var isExp=!!collapsed[bk];
+    html+='<div class="book-section'+(isExp?' expanded':'')+'" data-book="'+esc(bk)+'">';
+    html+='<div class="book-title" data-toggle="'+esc(bk)+'">'+esc(bk)+'<span class="book-title-arrow"></span></div>';
     html+='<div class="chapter-grid">';
     for(var ci=0;ci<bc.length;ci++){
       html+='<div class="chapter-chip" data-book="'+esc(bc[ci].book)+'" data-ch="'+bc[ci].chapter+'">Chapter '+bc[ci].chapter+'</div>';
@@ -733,13 +744,12 @@ document.body.addEventListener('click',function(e){
     if(!sec) sec=tog.parentNode;
     if(sec&&sec.classList){
       sec.classList.toggle('collapsed');
-      var arr=tog.querySelector('.book-title-arrow');
-      if(arr) arr.innerHTML=sec.classList.contains('collapsed')?'&#9654;':'&#9660;';
+      sec.classList.toggle('expanded');
       /* Persist state */
       var colKey='kjv:collapsed';
       var collapsed={};
       try{ var s=sGet(colKey); if(s) collapsed=JSON.parse(s); }catch(e){}
-      if(sec.classList.contains('collapsed')) collapsed[bname]=1;
+      if(sec.classList.contains('expanded')) collapsed[bname]=1;
       else delete collapsed[bname];
       try{ sSet(colKey,JSON.stringify(collapsed)); }catch(e){}
     }
